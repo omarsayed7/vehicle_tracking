@@ -22,7 +22,7 @@ from collections import deque
 import numpy as np
 palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
 data_deque = {}
-
+detection_classes = [1,2,3,4,5,6,7]
 deepsort = None
 
 def init_tracker():
@@ -183,11 +183,9 @@ class DetectionPredictor(BasePredictor):
                                         self.args.iou,
                                         agnostic=self.args.agnostic_nms,
                                         max_det=self.args.max_det)
-
         for i, pred in enumerate(preds):
             shape = orig_img[i].shape if self.webcam else orig_img.shape
             pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], shape).round()
-
         return preds
 
     def write_results(self, idx, preds, batch):
@@ -210,11 +208,15 @@ class DetectionPredictor(BasePredictor):
         log_string += '%gx%g ' % im.shape[2:]  # print string
         self.annotator = self.get_annotator(im0)
 
+        filtered_det = []
         det = preds[idx]
-        all_outputs.append(det)
         if len(det) == 0:
             return log_string
-        for c in det[:, 5].unique():
+        for inner_det in det:
+            c = inner_det[5]
+            if int(c) in detection_classes:
+                # Filter the traffic classes
+                filtered_det.append(inner_det)
             n = (det[:, 5] == c).sum()  # detections per class
             log_string += f"{n} {self.model.names[int(c)]}{'s' * (n > 1)}, "
         # write
@@ -223,7 +225,7 @@ class DetectionPredictor(BasePredictor):
         confs = []
         oids = []
         outputs = []
-        for *xyxy, conf, cls in reversed(det):
+        for *xyxy, conf, cls in reversed(filtered_det):
             x_c, y_c, bbox_w, bbox_h = xyxy_to_xywh(*xyxy)
             xywh_obj = [x_c, y_c, bbox_w, bbox_h]
             xywh_bboxs.append(xywh_obj)
