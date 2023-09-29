@@ -225,24 +225,29 @@ class DetectionPredictor(BasePredictor):
         confs = []
         oids = []
         outputs = []
-        for *xyxy, conf, cls in reversed(filtered_det):
-            x_c, y_c, bbox_w, bbox_h = xyxy_to_xywh(*xyxy)
-            xywh_obj = [x_c, y_c, bbox_w, bbox_h]
-            xywh_bboxs.append(xywh_obj)
-            confs.append([conf.item()])
-            oids.append(int(cls))
-        xywhs = torch.Tensor(xywh_bboxs)
-        confss = torch.Tensor(confs)
-          
-        outputs = deepsort.update(xywhs, confss, oids, im0)
-        if len(outputs) > 0:
-            bbox_xyxy = outputs[:, :4]
-            identities = outputs[:, -2]
-            object_id = outputs[:, -1]
+        if len(filtered_det) == 0:
+            outputs = deepsort.update(None, None, None, None)
+            return log_string
+        else:
+            filtered_det = torch.stack(filtered_det)
+            for *xyxy, conf, cls in reversed(filtered_det):
+                x_c, y_c, bbox_w, bbox_h = xyxy_to_xywh(*xyxy)
+                xywh_obj = [x_c, y_c, bbox_w, bbox_h]
+                xywh_bboxs.append(xywh_obj)
+                confs.append([conf.item()])
+                oids.append(int(cls))
+            xywhs = torch.Tensor(xywh_bboxs)
+            confss = torch.Tensor(confs)
             
-            draw_boxes(im0, bbox_xyxy, self.model.names, object_id,identities)
+            outputs = deepsort.update(xywhs, confss, oids, im0)
+            if len(outputs) > 0:
+                bbox_xyxy = outputs[:, :4]
+                identities = outputs[:, -2]
+                object_id = outputs[:, -1]
+                
+                draw_boxes(im0, bbox_xyxy, self.model.names, object_id,identities)
 
-        return log_string
+            return log_string
 
 
 @hydra.main(version_base=None, config_path=str(DEFAULT_CONFIG.parent), config_name=DEFAULT_CONFIG.name)
