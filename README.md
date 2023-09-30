@@ -60,9 +60,5 @@ HYDRA_FULL_ERROR=1 python run.py source="../data/road_1.mp4" model="yolov8x.pt"
 --model           yolov8 model size
 --source          relative path of the video file
 ```
-## Prediction Samples
-
-<!-- <p align="center">
-  <img src="imgs/samples.png" width="720" title="Deep-Emotion Architecture">
-</p> -->
-<video width="630" height="300" src="./data/road_1.mp4"></video>
+## Results Samples
+https://drive.google.com/drive/folders/1K-Vl_T3hGlbNtGj4VwhO_52q0JfgxZET?usp=sharing
