@@ -65,4 +65,4 @@ HYDRA_FULL_ERROR=1 python run.py source="../data/road_1.mp4" model="yolov8x.pt"
 <!-- <p align="center">
   <img src="imgs/samples.png" width="720" title="Deep-Emotion Architecture">
 </p> -->
-<video width="630" height="300" src="./data/road_2.mp4"></video>
+<video width="630" height="300" src="./data/road_1.mp4"></video>
